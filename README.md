@@ -1,5 +1,5 @@
 # IMDb_Scrapy
- first practice program
+<!--  first practice program
 
  2023/6/15 
    修正bug:
@@ -10,4 +10,4 @@
       1.影集功能新增-全集數資料蒐集
  2023/6/16 
    新增功能:
-      1.影集和電影合併
+      1.影集和電影合併 -->
