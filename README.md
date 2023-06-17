@@ -1,5 +1,5 @@
 # IMDb_Scrapy
- first practice program
+first practice program
 
 2023/6/15 
 修正bug:
