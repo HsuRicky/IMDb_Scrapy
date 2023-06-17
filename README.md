@@ -1,6 +1,7 @@
 # IMDb_Scrapy  
-first practice program  
-  
+First practice program
+將來如果有更多爬蟲相關的，可能也會更新上來
+***
 2023/6/15
   
 修正bug:  
