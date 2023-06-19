@@ -31,7 +31,8 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
         "User-Agent": random.choice(user_Agent),
         "Accept-Encoding": "gzip, deflate, br",
         "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        "Cookie": "lc-main=en_US"
     }
 
     # 檢查網址格式是否有誤
