@@ -17,7 +17,6 @@ def menu():
     print("***********************************")
 
 
-
 def imdb_scrapy(imdbUrl:str, season:str, episode:str):
     # 基本設定
     user_Agent = [
@@ -121,10 +120,10 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
 
         except:
             print("Season may be wrong, please check again.")
-            return
+            return False
         
 
-        print(f"User ok! Type:{video_check}.")
+        print(f"User ok...Type: {video_check}.")
         for season in season_list:
             sleep(random.randint(3, 6))
             res = requests.get(imdbUrl, headers=headers)
@@ -313,14 +312,18 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                     soup = BeautifulSoup(res.text, 'html.parser')
                     
                     # AllRole、Bio、Born 環節
-                    bio = soup.select_one(".ipc-html-content-inner-div").text
+                    try:
+                        bio = soup.select_one(".sc-c1781ec7-1 .ipc-html-content-inner-div").text
+                    except:
+                        bio = ""
+                    
                     try:
                         born = soup.select(".sc-dec7a8b-2")[1].text
                     except:
                         born = ""
                     
                     allRole_list = []
-                    allRoles = soup.select_one(".sc-afe43def-4").contents
+                    allRoles = soup.select(".sc-afe43def-4 li")
                     for allRole in allRoles:
                         allRole_list.append(allRole.text)
 
@@ -559,14 +562,18 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                             soup = BeautifulSoup(res.text, 'html.parser')
                             
                             # AllRole、Bio、Born 環節
-                            bio = soup.select_one(".ipc-html-content-inner-div").text
+                            try:
+                                bio = soup.select_one(".sc-c1781ec7-1 .ipc-html-content-inner-div").text
+                            except:
+                                bio = ""
+                            
                             try:
                                 born = soup.select(".sc-dec7a8b-2")[1].text
                             except:
                                 born = ""
                             
                             allRole_list = []
-                            allRoles = soup.select_one(".sc-afe43def-4").contents
+                            allRoles = soup.select(".sc-afe43def-4 li")
                             for allRole in allRoles:
                                 allRole_list.append(allRole.text)
 
@@ -648,6 +655,8 @@ def test(n):
         total += i
         sleep(0.2)
     print(total)
+
+
 
 
 
