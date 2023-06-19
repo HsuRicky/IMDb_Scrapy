@@ -313,7 +313,9 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                     
                     # AllRole、Bio、Born 環節
                     try:
-                        bio = soup.select_one(".sc-c1781ec7-1 .ipc-html-content-inner-div").text
+                        bio = soup.select_one(".sc-c1781ec7-1 .ipc-html-content-inner-div").text.replace("\n"," ")
+                        if len(bio) >= 500:
+                            bio = bio[:500] + "..."
                     except:
                         bio = ""
                     
@@ -649,17 +651,6 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
 
 
 
-def test(n):
-    total = 0
-    for i in range(n):
-        total += i
-        sleep(0.2)
-    print(total)
-
-
-
-
-
 
 if __name__ == "__main__":
     
@@ -680,41 +671,3 @@ if __name__ == "__main__":
             break
 
     
-    # test
-    '''
-    urls = [
-        "https://www.imdb.com/title/tt0266543/?ref_=adv_li_tt",
-        "https://www.imdb.com/title/tt0970416/?ref_=adv_li_tt",
-        "https://www.imdb.com/title/tt5311514/?ref_=adv_li_tt"
-    ]
-    start1 = time()
-    with ThreadPoolExecutor() as executor:
-        executor.map(imdb_movie_scrapy, urls) 
-    end1 = time()
-    print(end1-start1)
- '''
-    
-
-
-    # test
-    '''
-    start1 = time()
-    with ThreadPoolExecutor() as executor:
-        executor.map(test, [10, 20, 30]) 
-    end1 = time()
-    print(f"A: {end1-start1} s")
-
-
-    start2 = time()
-    for i in range(10, 31, 10):
-        test(i)
-    end2 = time()
-    print(f"B: {end2-start2} s")
-
-
-    start3 = time()
-    with ProcessPoolExecutor() as executor:
-        executor.map(test, [10, 20, 30]) 
-    end3 = time()
-    print(f"C: {end3-start3} s")
-    '''
