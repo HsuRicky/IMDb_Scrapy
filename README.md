@@ -1,7 +1,7 @@
 # IMDb_Scrapy
 >  first practice program，之後如果有新的網站實作，有機會在放在這邊
 ***
-#概述#  
+#概述  
 **簡介:**    
 >  抓取 IMDb 網站中電影及影集資料。
     
