@@ -232,9 +232,12 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                 if thumbnail600x400[-18:-16] == "CR": 
                     pick = round(int(thumbnail600x400[-22:-19]) * (600 / int(thumbnail600x400[-8:-5])))
                     thumbnail600x400 = thumbnail600x400[:-22] + str(pick) + thumbnail600x400[-19:-12] + "400,600" + thumbnail600x400[-5:]
-                else:
+                elif thumbnail600x400[-19:-17] == "CR":
                     pick = round(int(thumbnail600x400[-23:-20]) * (600 / int(thumbnail600x400[-8:-5])))
                     thumbnail600x400 = thumbnail600x400[:-23] + str(pick) + thumbnail600x400[-20:-12] + "400,600" + thumbnail600x400[-5:]
+                else:
+                    pick = round(int(thumbnail600x400[-24:-21]) * (600 / int(thumbnail600x400[-8:-5])))
+                    thumbnail600x400 = thumbnail600x400[:-24] + str(pick) + thumbnail600x400[-21:-12] + "400,600" + thumbnail600x400[-5:]
             except:
                 thumbnail600x400 = ""
 
@@ -361,7 +364,7 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                 da_list[i]["data"]["Born"] = born
                 da_list[i]["data"]["400x532"] = da400x532
                 da_list[i]["data"]["600x600"] = da600x600
-                print(f"Data \"{da_list[i]['data']['Name']}\" is ok!")
+                # print(f"Data \"{da_list[i]['data']['Name']}\" is ok!")
 
             # 將 Video 剩餘資料存入 datas 中
             datas[0]["Video"]["Director"] = da_list[0]["data"]
@@ -419,12 +422,14 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                 try:
                     thumbnail224x126 = eps[ep - 1].select_one("img.zero-z-index").get('src')
                     thumbnail600x600 = thumbnail224x126
-                    if thumbnail600x600[-21:-19] == "CR" and thumbnail600x600 != None:
-                        thumbnail600x600 = thumbnail600x600[:-25] + "1067" + thumbnail600x600[-22:-15] + "600,600" + thumbnail600x600[-8:]
-                    elif thumbnail600x600 == None:
+                    if thumbnail600x600 == None:
                         thumbnail600x600 = thumbnail224x126
+                    elif thumbnail600x600[-21:-19] == "CR":
+                        thumbnail600x600 = thumbnail600x600[:-25] + "1067" + thumbnail600x600[-22:-15] + "600,600" + thumbnail600x600[-8:]
+                    elif thumbnail600x600[-22:-20] == "CR":
+                        thumbnail600x600 = thumbnail600x600[:-26] + "600" + thumbnail600x600[-23:-15] + "600,600" + thumbnail600x600[-8:]
                     else:
-                        thumbnail600x600 = thumbnail600x600[:-17] + "1067_CR0,0,600,600_AL_.jpg"
+                        thumbnail600x600 = thumbnail600x600[:-17] + "600_CR0,0,600,600_AL_.jpg"
                     thumbnail_series["224x126"] = thumbnail224x126
                     thumbnail_series["600x600"] = thumbnail600x600
                 except:
@@ -611,7 +616,7 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
                         da_list[i]["data"]["Born"] = born
                         da_list[i]["data"]["400x532"] = da400x532
                         da_list[i]["data"]["600x600"] = da600x600
-                        print(f"Data \"{da_list[i]['data']['Name']}\" is ok!")
+                        # print(f"Data \"{da_list[i]['data']['Name']}\" is ok!")
                 except:
                     for _ in range(4 - len(da_list)):
                         da_list.append({"data": {"AllRole": "",
@@ -641,7 +646,7 @@ def imdb_scrapy(imdbUrl:str, season:str, episode:str):
             # 存入 Json 檔中
             if total_episodes > 1:
                 episode = "All"
-            with open(f'imdb_{title.replace(" ","_").replace(",","_").replace(":","_")}_Season{season}_Episode{episode}.json', 'w', encoding='utf-8') as file:
+            with open(f'imdb_{title.replace(": ","_").replace(", ","_").replace(" - ","_").replace(" ","_")}_Season{season}_Episode{episode}.json', 'w', encoding='utf-8') as file:
                 json.dump(new_datas, file, indent=4, ensure_ascii=False)
                 print(f"{title} : Season{season} Episode{episode} done!")
                 print("=" * 20)
@@ -663,8 +668,8 @@ if __name__ == "__main__":
                 print("URL is required, please try again.")
                 continue
 
-            season = input("Please enter season(or year)(Enter \"all\" = the entire episode):")
-            episode = input("Please enter episode(Enter \"all\", the entire season ):")
+            season = input("Please enter season(or year)(Enter \"all\" = the entire series):")
+            episode = input("Please enter episode(Enter \"all\", the entire season):")
             imdb_scrapy(url, season, episode)
         else:
             print("Bye bye.")
