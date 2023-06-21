@@ -49,7 +49,6 @@ class Checking(Prepare):
             return False     
     
     def userChecking(self):
-        # if self.urlChecking == True:
         super().setting()
         self.imdbUrl = self.match[0]
         res = requests.get(self.imdbUrl, headers=self.headers)
@@ -112,13 +111,13 @@ class Checking(Prepare):
                 # 4檢查 episode 是否存在
                 try:
                     if self.season.lower() != "all" and self.video_check == 'series':
-                        self.eplist = soup.select_one(".list.detail.eplist")
-                        self.eps = self.eplist.select(".image")
-                        self.start_ep = self.eps[0].select_one(".hover-over-image").text.split(',')[-1].replace('Ep','').strip()
-                        self.end_ep = int(self.start_ep) + len(self.eps) - 1
+                        eplist = soup.select_one(".list.detail.eplist")
+                        eps = eplist.select(".image")
+                        start_ep = eps[0].select_one(".hover-over-image").text.split(',')[-1].replace('Ep','').strip()
+                        end_ep = int(start_ep) + len(eps) - 1
                         if self.episode.lower() != "all":
                             try:
-                                if (int(self.episode) - int(self.start_ep) + 1) > len(self.eps) or int(self.episode) < int(self.start_ep) or int(self.episode) > self.end_ep:
+                                if (int(self.episode) - int(start_ep) + 1) > len(eps) or int(self.episode) < int(start_ep) or int(self.episode) > end_ep:
                                     print(f"Episode {self.episode} does not exist.")
                                     return False
                             except:
@@ -133,12 +132,13 @@ class Checking(Prepare):
                 if self.season.lower() != "all":
                     self.season_list = [self.season]
                 print(f"Season: {(', ').join(self.season_list)}")
+            print(f"User ok...Type: {self.video_check}.")
+            return True
 
         except:
             print("Season may be wrong, please check again.")
             return False
-        print(f"User ok...Type: {self.video_check}.")
-        return True
+
 
 
 
@@ -264,7 +264,6 @@ class Scrapy(Checking):
 
     def videoScrapy(self):
         super().setting()
-        super().userChecking()
         sleep(random.randint(3, 6))
         res = requests.get(self.imdbUrl, headers=self.headers)
         print(f"Video check:{res.status_code}")
@@ -425,6 +424,7 @@ class Scrapy(Checking):
         for season in self.season_list:
             super().setting()
             sleep(random.randint(3, 6))
+            self.imdbUrl_season = self.imdbUrl + f"episodes?season={season}"
             res = requests.get(self.imdbUrl_season, headers=self.headers)
             print("=" * 20)
             print(f"Season {season} check:{res.status_code}")
@@ -432,14 +432,17 @@ class Scrapy(Checking):
             self.soup = BeautifulSoup(res.text, 'html.parser')
 
             # 檢查使用者輸入，如果是要整季(年)，把篇數紀錄下來
-            if self.episode.lower() == "all" and season in self.season_list:
-                total_episodes = len(self.eps)
+            eplist = self.soup.select_one(".list.detail.eplist")
+            eps = eplist.select(".image")
+            start_ep = eps[0].select_one(".hover-over-image").text.split(',')[-1].replace('Ep','').strip()
+            if self.episode.lower() == "all" or self.season.lower() == "all":
+                total_episodes = len(eps)
                 low = 1
                 high = total_episodes + 1
             else:
                 total_episodes = 1
                 try:
-                    low = int(self.episode) - int(self.start_ep) + 1
+                    low = int(self.episode) - int(start_ep) + 1
                 except:
                     pass
                 high = low + 1
@@ -451,27 +454,32 @@ class Scrapy(Checking):
 
 
             for ep in range(low, high):
-                img_ep = self.eps[ep - 1].select_one(".hover-over-image").text.split(',')[-1].replace('Ep','').strip()
-                subtitle = self.eps[ep - 1].select_one('a').get('title')
+                img_ep = eps[ep - 1].select_one(".hover-over-image").text.split(',')[-1].replace('Ep','').strip()
+                subtitle = eps[ep - 1].select_one('a').get('title')
                 print(f"Episode {img_ep} is exist: {subtitle}")
-                imdbUrl_ep = "https://www.imdb.com" + self.eps[ep - 1].select_one('a').get('href')
+                imdbUrl_ep = "https://www.imdb.com" + eps[ep - 1].select_one('a').get('href')
                 thumbnail_series = {}
                 try:
-                    thumbnail224x126 = self.eps[ep - 1].select_one("img.zero-z-index").get('src')
+                    thumbnail224x126 = eps[ep - 1].select_one("img.zero-z-index").get('src')
                     thumbnail600x600 = thumbnail224x126
                     if thumbnail600x600 == None:
                         thumbnail600x600 = thumbnail224x126
                     elif thumbnail600x600[-21:-19] == "CR":
-                        thumbnail600x600 = thumbnail600x600[:-25] + "1067" + thumbnail600x600[-22:-15] + "600,600" + thumbnail600x600[-8:]
+                        if thumbnail600x600[-27:-25] == "UX":
+                            thumbnail600x600 = thumbnail600x600[:-25] + "1067" + thumbnail600x600[-22:-15] + "600,600" + thumbnail600x600[-8:]
+                        else:
+                            thumbnail600x600 = thumbnail600x600[:-25] + "600" + thumbnail600x600[-22:-15] + "600,600" + thumbnail600x600[-8:]
                     elif thumbnail600x600[-22:-20] == "CR":
-                        thumbnail600x600 = thumbnail600x600[:-26] + "600" + thumbnail600x600[-23:-15] + "600,600" + thumbnail600x600[-8:]
+                        if thumbnail600x600[-28:-26] == "UX":
+                            thumbnail600x600 = thumbnail600x600[:-26] + "1067" + thumbnail600x600[-23:-15] + "600,600" + thumbnail600x600[-8:]
+                        else:
+                            thumbnail600x600 = thumbnail600x600[:-26] + "600" + thumbnail600x600[-23:-15] + "600,600" + thumbnail600x600[-8:]
                     else:
                         thumbnail600x600 = thumbnail600x600[:-17] + "600_CR0,0,600,600_AL_.jpg"
-                    thumbnail_series["224x126"] = thumbnail224x126
-                    thumbnail_series["600x600"] = thumbnail600x600
                 except:
-                    thumbnail_series["224x126"] = ""
-                    thumbnail_series["600x600"] = ""
+                    thumbnail224x126, thumbnail600x600 = "", ""
+                thumbnail_series["224x126"] = thumbnail224x126
+                thumbnail_series["600x600"] = thumbnail600x600
 
                 # 進入 episode 頁面 
                 sleep(random.randint(3, 6))
@@ -498,14 +506,6 @@ class Scrapy(Checking):
                 except:
                     year = ""
                 
-                try: 
-                    if yal[-1].text != yal[1].text:
-                        age = yal[1].text
-                    else:
-                        age = ""
-                except:
-                    age = ""
-                
                 # Length 資料分析環節
                 if (len(yal[-1].text) > 3) and ("m" in yal[-1].text[-1]): # case: 1h23m
                     length_hours = yal[-1].text.split(' ')[0].replace('h','')
@@ -517,6 +517,14 @@ class Scrapy(Checking):
                     length = int(yal[-1].text.replace('h','')) * 60
                 else:
                     length = ""
+
+                try: 
+                    if length == "" or yal[-1].text != yal[1].text:
+                        age = yal[1].text
+                    else:
+                        age = ""
+                except:
+                    age = ""
 
 
                 # 抓取 Thumbnail 資料(圖片url中有藏圖片格式參數，直接進行調整)(出現新的格式，如果再有例外可能用 re 處理 比較不會出問題)
@@ -574,7 +582,9 @@ class Scrapy(Checking):
             # 存入 Json 檔中
             if total_episodes > 1:
                 self.episode = "All"
-            with open(f'imdb_{self.title.replace(": ","_").replace(", ","_").replace(" - ","_").replace(" ","_")}_Season{self.season}_Episode{self.episode}.json', 'w', encoding='utf-8') as file:
+            else:
+                self.episode = img_ep
+            with open(f'imdb_{self.title.replace(": ","_").replace(", ","_").replace(" - ","_").replace(" ","_")}_Season{season}_Episode{self.episode}.json', 'w', encoding='utf-8') as file:
                 json.dump(self.new_datas, file, indent=4, ensure_ascii=False)
                 print(f"{self.title} : Season{season} Episode{self.episode} done!")
                 print("=" * 20)
@@ -584,8 +594,8 @@ class Scrapy(Checking):
 
 
 
-# 測試專區
-'''
+# 測試用方法專區
+
 def get_url(imbdurl:str):
     user_Agent = [
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
@@ -616,28 +626,59 @@ def get_url(imbdurl:str):
             f.write(url + "\n")
         print('Done!')
 
-def quick(url, season, episodes):
+def scrapy(url, season, episodes):
     test = Scrapy(url, season, episodes)
-    result = test.urlChecking()
-    if result == True:
+    urlCheck = test.urlChecking()
+    userCheck = test.userChecking()
+    if urlCheck == True and userCheck == True:
         test.videoScrapy()
         if test.video_check == "series":
             test.seriesScrapy()
 
 
 if  __name__ == "__main__":
-    get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=351&explore=genres&ref_=adv_nxt")
+    while True:
+        menu = Prepare()
+        menu.menu()
+        user_choice = input("Please choose your want:")
+        if user_choice == "1":
+            url = input("Please enter url:")
+            if url.strip() == "":
+                print("URL is required, please try again.")
+                continue
 
-    with open('url_list.txt', mode='r', encoding='utf-8') as f:
-        urls = f.readlines()
+            season = input("Please enter season(or year)(Enter \"all\" = the entire series):")
+            episode = input("Please enter episode(Enter \"all\", the entire season):")
+            
+            test = Scrapy(url, season, episode)
+            urlCheck = test.urlChecking()
+            userCheck = test.userChecking()
+            if urlCheck == True and userCheck == True:
+                test.videoScrapy()
+                if test.video_check == "series":
+                    test.seriesScrapy()
+        else:
+            print("Bye bye.")
+            break
 
-    url_list= [url.strip() for url in urls]
 
-    with ThreadPoolExecutor() as executor:
-        for url in url_list:
-            executor.submit(quick, url, "1", "3")
 
-    print("done.....")
+
+
+    # get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=201&explore=genres&ref_=adv_nxt")
+
+    # with open('url_list.txt', mode='r', encoding='utf-8') as f:
+    #     urls = f.readlines()
+
+    # url_list= [url.strip() for url in urls]
+
+    # with ThreadPoolExecutor() as executor:
+    #     for url in url_list:
+    #         executor.submit(scrapy, url, "2", "5")
+
+    # print("done.....")
     
-'''
+    # scrapy("https://www.imdb.com/title/tt8354062/?ref_=fn_al_tt_1", "all", "efdsrtr55")
+
+
 
