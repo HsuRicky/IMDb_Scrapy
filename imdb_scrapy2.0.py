@@ -224,8 +224,12 @@ class Scrapy(Checking):
                             da400x532 = da400x532[:-22] + str(pickUY) + da400x532[-19:-16] + str(pickCR) + da400x532[-15:-12] + "400,532" + da400x532[-5:]
                         elif da400x532[-19:-17] == "CR":
                             pickUY = round(int(da400x532[-23:-20]) * (400 / int(da400x532[-12:-9])))
-                            pickCR = round(int(da400x532[-17:-15]) * (400 / int(da400x532[-12:-9])))
-                            da400x532 = da400x532[:-23] + str(pickUY) + da400x532[-20:-17] + str(pickCR) + da400x532[-15:-12] + "400,532" + da400x532[-5:]
+                            try:
+                                pickCR = round(int(da400x532[-17:-15]) * (400 / int(da400x532[-12:-9])))
+                                da400x532 = da400x532[:-23] + str(pickUY) + da400x532[-20:-17] + str(pickCR) + da400x532[-15:-12] + "400,532" + da400x532[-5:]
+                            except:
+                                pickCR = round(int(da400x532[-15:-13]) * (400 / int(da400x532[-12:-9])))
+                                da400x532 = da400x532[:-23] + str(pickUY) + da400x532[-20:-15] + str(pickCR) + ",400,532" + da400x532[-5:]
                         else:
                             pickUY = round(int(da400x532[-24:-21]) * (400 / int(da400x532[-12:-9])))
                             pickCR = round(int(da400x532[-18:-15]) * (400 / int(da400x532[-12:-9])))
@@ -665,7 +669,7 @@ if  __name__ == "__main__":
 
 
 
-    # get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=201&explore=genres&ref_=adv_nxt")
+    # get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=451&explore=genres&ref_=adv_nxt")
 
     # with open('url_list.txt', mode='r', encoding='utf-8') as f:
     #     urls = f.readlines()
@@ -674,11 +678,11 @@ if  __name__ == "__main__":
 
     # with ThreadPoolExecutor() as executor:
     #     for url in url_list:
-    #         executor.submit(scrapy, url, "2", "5")
+    #         executor.submit(scrapy, url, "3", "3")
 
     # print("done.....")
     
-    # scrapy("https://www.imdb.com/title/tt8354062/?ref_=fn_al_tt_1", "all", "efdsrtr55")
+    # scrapy("https://www.imdb.com/title/tt3066242/?ref_=adv_li_tt", "3", "3")
 
 
 
