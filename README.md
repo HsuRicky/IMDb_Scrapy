@@ -45,4 +45,6 @@
 ### 2023/6/27  
 修正bug:  
 >  1. 修正電影部分網站da環節，若只有director，導致程式直接跳到except的bug  
->  2. 修正輸入網址非IMDB 格式，直接跳error的bug
+>  2. 修正輸入網址非IMDB 格式，直接跳error的bug  
+>  3. 修正影集頁面yal(year,age,length)資料全缺的情況，會跳error的bug  
+  
