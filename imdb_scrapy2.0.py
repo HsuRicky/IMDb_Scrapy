@@ -46,24 +46,25 @@ class Checking(Prepare):
         if self.match:
             return True
         else:
+            print("URL may be wrong, please check again.")
             return False     
     
     def userChecking(self):
         super().setting()
-        self.imdbUrl = self.match[0]
-        res = requests.get(self.imdbUrl, headers=self.headers)
-        print(f"Video check:{res.status_code}")
-
-        self.video_check = ""
-        print("User checking...")
-        # 0確認連線
-        if res.status_code == 404:
-            print("Please check your internet or URL and try again.")
-            return False
-        
-        soup = BeautifulSoup(res.text, 'html.parser')
-        # 電影與影集區分環節
         try:
+            self.imdbUrl = self.match[0]
+            res = requests.get(self.imdbUrl, headers=self.headers)
+            print(f"Video check:{res.status_code}")
+
+            self.video_check = ""
+            print("User checking...")
+            # 0確認連線
+            if res.status_code == 404:
+                print("Please check your internet or URL and try again.")
+                return False
+            
+            soup = BeautifulSoup(res.text, 'html.parser')
+            # 電影與影集區分環節
             stupid_check = soup.select_one('.sc-219085a0-1')
             if stupid_check == None:
                 self.video_check = "movie"
@@ -177,18 +178,19 @@ class Scrapy(Checking):
                                                     "More": ""}})
                 except:
                     pass
-
+            
             # 如果 Director、Actor 的資料不齊全或是格式不對的話修正
-            while True:
+            try:
                 if self.da_list[1]["data"]["Name"] == "":
                     self.da_list.pop(1)
+            except:
+                pass
 
-                if len(self.da_list) < 4:
-                    self.da_list.append({"data": {"Name": "",
+            while len(self.da_list) < 4:
+                self.da_list.append({"data": {"Name": "",
                                                 "More": ""}})
-                else:
-                    break
-            
+
+
             # 抓取 Director&Actors AllRole、Bio、Born、img 資料
             for i in range(len(self.da_list)):
                 if self.da_list[i]["data"]["More"] != "":
@@ -307,7 +309,7 @@ class Scrapy(Checking):
             else:
                 year = int(yal[1].text[:4])
             
-            try: # 可以再想一下比較不會那麼死
+            try: 
                 age = yal[2].text
             except:
                 age = ""
@@ -347,14 +349,6 @@ class Scrapy(Checking):
             except:
                 year = ""
             
-            try: 
-                if yal[-1].text != yal[1].text:
-                    age = yal[1].text
-                else:
-                    age = ""
-            except:
-                age = ""
-            
             # Length 資料分析環節
             if (len(yal[-1].text) > 3) and ("m" in yal[-1].text[-1]): # case: 1h23m
                 length_hours = yal[-1].text.split(' ')[0].replace('h','')
@@ -366,6 +360,14 @@ class Scrapy(Checking):
                 length = int(yal[-1].text.replace('h','')) * 60
             else:
                 length = ""
+            
+            try: 
+                if length == "" or yal[-1].text != yal[1].text:
+                    age = yal[1].text
+                else:
+                    age = ""
+            except:
+                age = ""
 
         # 抓取 Thumbnail 資料(圖片url中有藏圖片格式參數，直接進行調整)
         thumbnail = {}
@@ -419,7 +421,7 @@ class Scrapy(Checking):
             self.datas[0]["Video"]["Season"] = False
             self.datas[0]["Series"] = False
             # 存入 Json 檔中
-            with open(f'imdb_{self.title.replace(" ","_").replace(",","_").replace(":","_")}.json', 'w', encoding='utf-8') as file:
+            with open(f'imdb_{self.title.replace(": ","_").replace(", ","_").replace(" - ","_").replace(" ","_")}.json', 'w', encoding='utf-8') as file:
                 json.dump(self.datas, file, indent=4, ensure_ascii=False)
                 print(f"{self.title}: done!")
                 return True
@@ -656,11 +658,13 @@ if  __name__ == "__main__":
             
             test = Scrapy(url, season, episode)
             urlCheck = test.urlChecking()
-            userCheck = test.userChecking()
-            if urlCheck == True and userCheck == True:
-                test.videoScrapy()
-                if test.video_check == "series":
-                    test.seriesScrapy()
+            if urlCheck == True:
+                userCheck = test.userChecking()
+                if userCheck == True:
+                    test.videoScrapy()
+                    if test.video_check == "series":
+                        test.seriesScrapy()
+
         else:
             print("Bye bye.")
             break
@@ -669,7 +673,7 @@ if  __name__ == "__main__":
 
 
 
-    # get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=451&explore=genres&ref_=adv_nxt")
+    # get_url("https://www.imdb.com/search/title/?title_type=movie&start=1&ref_=adv_nxt")
 
     # with open('url_list.txt', mode='r', encoding='utf-8') as f:
     #     urls = f.readlines()
@@ -682,7 +686,7 @@ if  __name__ == "__main__":
 
     # print("done.....")
     
-    # scrapy("https://www.imdb.com/title/tt3066242/?ref_=adv_li_tt", "3", "3")
+    # scrapy("https://www.imdb.com/name/nm3943473/?ref_=tt_ov_dr", "3", "3")
 
 
 
