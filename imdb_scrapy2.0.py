@@ -1,10 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 
-from concurrent.futures import ThreadPoolExecutor
-
 import random, copy, re, json
 from time import sleep, time
+
+from concurrent.futures import ThreadPoolExecutor
+
 
 
 # 資料準備
@@ -35,7 +36,6 @@ class Prepare:
             "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
             "Cache-Control": "no-cache",
             "Cookie": "lc-main=en_US"}
-
 
 
 # 各種檢查
@@ -141,8 +141,6 @@ class Checking(Prepare):
             return False
 
 
-
-
 # 開爬環節
 class Scrapy(Checking):
     def daScarpy(self):
@@ -156,7 +154,7 @@ class Scrapy(Checking):
                     # 抓取 Director Name、More 資料
                     if check.select_one(".ipc-metadata-list-item__label").text == "Director" or check.select_one(".ipc-metadata-list-item__label").text == "Directors":
                         director_name = check.select_one(".ipc-metadata-list-item__list-content-item").text
-                        director_more = "https://www.imdb.com/" + check.select_one(".ipc-metadata-list-item__list-content-item").get('href')
+                        director_more = "https://www.imdb.com" + check.select_one(".ipc-metadata-list-item__list-content-item").get('href')
                         self.da_list.append({"data": {"Name": director_name,
                                                     "More": director_more}})
                     # 抓取 Actors Name、More 資料
@@ -164,7 +162,7 @@ class Scrapy(Checking):
                         actors = check.select(".ipc-inline-list__item")
                         for actor in actors:
                             actor_name = actor.select_one(".ipc-metadata-list-item__list-content-item").text
-                            actor_more = "https://www.imdb.com/" + actor.select_one(".ipc-metadata-list-item__list-content-item").get('href')
+                            actor_more = "https://www.imdb.com" + actor.select_one(".ipc-metadata-list-item__list-content-item").get('href')
                             if len(self.da_list) == 0:
                                 self.da_list.append({"data": {"Name": "",
                                                             "More": ""}})
@@ -506,31 +504,34 @@ class Scrapy(Checking):
                     iMDB = ""
 
                 # 抓取 Year、Age 、Length 資料 (避免資料有誤，故都用try)
-                yal = self.soup.select_one(".sc-afe43def-4").contents
                 try:
-                    year = int(yal[0].text[-4:])
-                except:
-                    year = ""
-                
-                # Length 資料分析環節
-                if (len(yal[-1].text) > 3) and ("m" in yal[-1].text[-1]): # case: 1h23m
-                    length_hours = yal[-1].text.split(' ')[0].replace('h','')
-                    length_mins = yal[-1].text.split(' ')[1].replace('m','')
-                    length = int(length_hours) * 60 + int(length_mins)
-                elif (len(yal[-1].text) <= 3) and ("m" in yal[-1].text[-1]): # case: 46m
-                    length = int(yal[-1].text.replace('m',''))
-                elif (len(yal[-1].text) <= 3) and ("h" in yal[-1].text[-1]): # case: 1h
-                    length = int(yal[-1].text.replace('h','')) * 60
-                else:
-                    length = ""
-
-                try: 
-                    if length == "" or yal[-1].text != yal[1].text:
-                        age = yal[1].text
+                    yal = self.soup.select_one(".sc-afe43def-4").contents
+                    try:
+                        year = int(yal[0].text[-4:])
+                    except:
+                        year = ""
+                    
+                    # Length 資料分析環節
+                    if (len(yal[-1].text) > 3) and ("m" in yal[-1].text[-1]): # case: 1h23m
+                        length_hours = yal[-1].text.split(' ')[0].replace('h','')
+                        length_mins = yal[-1].text.split(' ')[1].replace('m','')
+                        length = int(length_hours) * 60 + int(length_mins)
+                    elif (len(yal[-1].text) <= 3) and ("m" in yal[-1].text[-1]): # case: 46m
+                        length = int(yal[-1].text.replace('m',''))
+                    elif (len(yal[-1].text) <= 3) and ("h" in yal[-1].text[-1]): # case: 1h
+                        length = int(yal[-1].text.replace('h','')) * 60
                     else:
+                        length = ""
+
+                    try: 
+                        if length == "" or yal[-1].text != yal[1].text:
+                            age = yal[1].text
+                        else:
+                            age = ""
+                    except:
                         age = ""
                 except:
-                    age = ""
+                    year = age = length = ""
 
 
                 # 抓取 Thumbnail 資料(圖片url中有藏圖片格式參數，直接進行調整)(出現新的格式，如果再有例外可能用 re 處理 比較不會出問題)
@@ -596,53 +597,8 @@ class Scrapy(Checking):
                 print("=" * 20)
 
 
-
-
-
-
-# 測試用方法專區
-
-def get_url(imbdurl:str):
-    user_Agent = [
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:65.0) Gecko/20100101 Firefox/65.0",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.3 Safari/605.1.15",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/18.17763",
-        "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"]
-    headers = {
-        "User-Agent": random.choice(user_Agent),
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Cache-Control": "no-cache"
-    }
-    res = requests.get(imbdurl, headers=headers)
-    soup = BeautifulSoup(res.text, 'html.parser')
-
-    url_list = []
-    urls = soup.select('.lister-item-image a')
-    for url in urls:
-        ur = "https://www.imdb.com" + url.get('href')
-        url_list.append(ur)
-    
-    # print(len(url_list))
-
-    with open('url_list.txt', mode='w', encoding='utf-8') as f:
-        for url in url_list:
-            f.write(url + "\n")
-        print('Done!')
-
-def scrapy(url, season, episodes):
-    test = Scrapy(url, season, episodes)
-    urlCheck = test.urlChecking()
-    userCheck = test.userChecking()
-    if urlCheck == True and userCheck == True:
-        test.videoScrapy()
-        if test.video_check == "series":
-            test.seriesScrapy()
-
-
-if  __name__ == "__main__":
+# 主程式
+def main():
     while True:
         menu = Prepare()
         menu.menu()
@@ -673,19 +629,100 @@ if  __name__ == "__main__":
 
 
 
-    # get_url("https://www.imdb.com/search/title/?title_type=movie&start=1&ref_=adv_nxt")
 
-    # with open('url_list.txt', mode='r', encoding='utf-8') as f:
-    #     urls = f.readlines()
 
-    # url_list= [url.strip() for url in urls]
 
-    # with ThreadPoolExecutor() as executor:
-    #     for url in url_list:
-    #         executor.submit(scrapy, url, "3", "3")
 
-    # print("done.....")
+
+if  __name__ == "__main__":
+    main()
+
+
+
+
     
+    
+
+
+
+    ### 測試專區^___________^ ###
+    from tqdm import tqdm
+    import concurrent.futures
+    from io import StringIO
+    import sys
+
+
+    # 測試用方法專區
+    def get_url(imbdurl:str):
+        user_Agent = [
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:65.0) Gecko/20100101 Firefox/65.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.3 Safari/605.1.15",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/18.17763",
+            "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"]
+        headers = {
+            "User-Agent": random.choice(user_Agent),
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Cache-Control": "no-cache"
+        }
+        res = requests.get(imbdurl, headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+
+        url_list = []
+        urls = soup.select('.lister-item-image a')
+        for url in urls:
+            ur = "https://www.imdb.com" + url.get('href')
+            url_list.append(ur)
+        
+        # print(len(url_list))
+
+        with open('url_list.txt', mode='w', encoding='utf-8') as f:
+            for url in url_list:
+                f.write(url + "\n")
+            print('Done!')
+
+    def scrapy(url, season, episodes):
+        test = Scrapy(url, season, episodes)
+        urlCheck = test.urlChecking()
+        userCheck = test.userChecking()
+        if urlCheck == True and userCheck == True:
+            test.videoScrapy()
+            if test.video_check == "series":
+                test.seriesScrapy()
+
+
+
+    # 大量測試
+    output = StringIO()
+    sys.stdout = output
+
+    get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=51&explore=genres&ref_=adv_nxt")
+
+    with open('url_list.txt', mode='r', encoding='utf-8') as f:
+        urls = f.readlines()
+
+    url_list= [url.strip() for url in urls]
+
+    with ThreadPoolExecutor() as executor:
+        with tqdm(total=len(url_list), desc="Processing", unit="URL", ncols=80, leave=True, colour='red', position=0) as pbar:
+            for future in concurrent.futures.as_completed([executor.submit(scrapy, url, "3", "3") for url in url_list]):
+                pbar.update(1)
+
+    # 把過程最後全部print 出來
+    # sys.stdout = sys.__stdout__
+    # print(output.getvalue())
+
+    print("done.....")
+    
+    
+
+
+
+
+
+    # 單測試
     # scrapy("https://www.imdb.com/name/nm3943473/?ref_=tt_ov_dr", "3", "3")
 
 
