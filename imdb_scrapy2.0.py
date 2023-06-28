@@ -5,6 +5,7 @@ import random, copy, re, json
 from time import sleep, time
 
 from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
 
 
 
@@ -190,7 +191,7 @@ class Scrapy(Checking):
 
 
             # 抓取 Director&Actors AllRole、Bio、Born、img 資料
-            for i in range(len(self.da_list)):
+            for i in tqdm(range(len(self.da_list)), total=len(self.da_list), desc="Director & Stars", unit="URL", ncols=80, colour='#FFA042'):
                 if self.da_list[i]["data"]["More"] != "":
                     sleep(random.randint(3, 6))
                     res = requests.get(self.da_list[i]["data"]["More"], headers=self.headers)          
@@ -291,12 +292,12 @@ class Scrapy(Checking):
                 self.title = self.soup.select_one(".sc-afe43def-1").text
 
             try:
-                excerpt = self.soup.select_one(".sc-cd57914c-2").text
+                excerpt = self.soup.select_one(".sc-6a7933c5-3").text
             except:
                 excerpt = ""
             
             try:
-                iMDB = float(self.soup.select_one(".sc-bde20123-1 ").text)
+                iMDB = float(self.soup.select_one(".sc-bde20123-1").text)
             except:
                 iMDB = ""
 
@@ -331,7 +332,7 @@ class Scrapy(Checking):
                 self.title = self.soup.select_one(".sc-afe43def-1").text
 
             try:
-                excerpt = self.soup.select_one(".sc-cd57914c-2").text
+                excerpt = self.soup.select_one(".sc-6a7933c5-3").text
             except:
                 excerpt = ""
 
@@ -646,7 +647,6 @@ if  __name__ == "__main__":
 
 
     ### 測試專區^___________^ ###
-    from tqdm import tqdm
     import concurrent.futures
     from io import StringIO
     import sys
@@ -695,6 +695,7 @@ if  __name__ == "__main__":
 
 
     # 大量測試
+    '''
     output = StringIO()
     sys.stdout = output
 
@@ -715,7 +716,7 @@ if  __name__ == "__main__":
     # print(output.getvalue())
 
     print("done.....")
-    
+    '''
     
 
 
