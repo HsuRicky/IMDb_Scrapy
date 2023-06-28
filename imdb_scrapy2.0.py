@@ -308,11 +308,6 @@ class Scrapy(Checking):
             else:
                 year = int(yal[1].text[:4])
             
-            try: 
-                age = yal[2].text
-            except:
-                age = ""
-            
             if (len(yal[-1].text) > 3) and ("m" in yal[-1].text[-1]): # case: 1h23m
                 length_hours = yal[-1].text.split(' ')[0].replace('h','')
                 length_mins = yal[-1].text.split(' ')[1].replace('m','')
@@ -323,6 +318,14 @@ class Scrapy(Checking):
                 length = int(yal[-1].text.replace('h','')) * 60
             else:
                 length = ""
+
+            try: 
+                if length == "" or len(yal) == 4:
+                    age = yal[2].text
+                else:
+                    age = ""
+            except:
+                age = ""
 
         # title、Excerpt、IMDB 資料(for movie)
         else:
@@ -636,7 +639,7 @@ def main():
 
 
 if  __name__ == "__main__":
-    main()
+    # main()
 
 
 
@@ -695,11 +698,11 @@ if  __name__ == "__main__":
 
 
     # 大量測試
-    '''
+ 
     output = StringIO()
     sys.stdout = output
 
-    get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=51&explore=genres&ref_=adv_nxt")
+    get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=401&explore=genres&ref_=adv_nxt")
 
     with open('url_list.txt', mode='r', encoding='utf-8') as f:
         urls = f.readlines()
@@ -708,7 +711,7 @@ if  __name__ == "__main__":
 
     with ThreadPoolExecutor() as executor:
         with tqdm(total=len(url_list), desc="Processing", unit="URL", ncols=80, leave=True, colour='red', position=0) as pbar:
-            for future in concurrent.futures.as_completed([executor.submit(scrapy, url, "3", "3") for url in url_list]):
+            for future in concurrent.futures.as_completed([executor.submit(scrapy, url, "2", "9") for url in url_list]):
                 pbar.update(1)
 
     # 把過程最後全部print 出來
@@ -716,7 +719,10 @@ if  __name__ == "__main__":
     # print(output.getvalue())
 
     print("done.....")
-    '''
+
+
+
+    
     
 
 
