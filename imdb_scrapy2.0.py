@@ -639,7 +639,7 @@ def main():
 
 
 if  __name__ == "__main__":
-    # main()
+    main()
 
 
 
@@ -698,7 +698,7 @@ if  __name__ == "__main__":
 
 
     # 大量測試
- 
+    '''
     output = StringIO()
     sys.stdout = output
 
@@ -720,7 +720,7 @@ if  __name__ == "__main__":
 
     print("done.....")
 
-
+    '''
 
     
     
