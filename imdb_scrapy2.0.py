@@ -191,7 +191,9 @@ class Scrapy(Checking):
 
 
             # 抓取 Director&Actors AllRole、Bio、Born、img 資料
-            for i in tqdm(range(len(self.da_list)), total=len(self.da_list), desc="Director & Stars", unit="URL", ncols=80, colour='#FFA042'):
+            pbar = tqdm(range(len(self.da_list)), unit="URL", ncols=80, colour='#FFA042')
+            for i in pbar:
+                pbar.set_description(f"{i}:{self.da_list[i]['data']['Name']}")
                 if self.da_list[i]["data"]["More"] != "":
                     sleep(random.randint(3, 6))
                     res = requests.get(self.da_list[i]["data"]["More"], headers=self.headers)          
@@ -639,7 +641,7 @@ def main():
 
 
 if  __name__ == "__main__":
-    main()
+    # main()
 
 
 
@@ -698,11 +700,11 @@ if  __name__ == "__main__":
 
 
     # 大量測試
-    '''
+    
     output = StringIO()
     sys.stdout = output
 
-    get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=401&explore=genres&ref_=adv_nxt")
+    get_url("https://www.imdb.com/search/title/?title_type=movie")
 
     with open('url_list.txt', mode='r', encoding='utf-8') as f:
         urls = f.readlines()
@@ -720,7 +722,7 @@ if  __name__ == "__main__":
 
     print("done.....")
 
-    '''
+    
 
     
     
