@@ -3,7 +3,7 @@
   
 # 概述  
 ### **簡介:** 
->  ![IMDb](imdb_mark.jpg)("https://www.imdb.com/")   
+>  ![IMDb](imdb_mark.jpg)(https://www.imdb.com/)   
 >  抓取 IMDb 網站中電影及影集資料。
       
 ### **使用方式:**  
