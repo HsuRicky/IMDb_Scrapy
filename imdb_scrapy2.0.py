@@ -9,6 +9,18 @@ from tqdm import tqdm
 
 
 
+'''
+使用方式:
+使用者輸入 IMDb 網站的電影或影集網址，若為電影網址，季數和集數不須輸入並可以抓取該電影各式資訊；
+若為影集網址，得輸入季數及集數，但若想爬全部季數影片，則季數輸入"all"，若想爬取某季數的影片，則級數輸入"all"。
+
+參數說明:
+imdUrl:IMDB網址
+season:影集季數
+episode:影集級數
+
+'''
+
 # 資料準備
 class Prepare:
     def __init__(self, imdbUrl="", season="", episode=""):
@@ -637,11 +649,8 @@ def main():
 
 
 
-
-
-
 if  __name__ == "__main__":
-    # main()
+    main()
 
 
 
@@ -657,7 +666,7 @@ if  __name__ == "__main__":
     import sys
 
 
-    # 測試用方法專區
+    ### 測試用方法專區
     def get_url(imbdurl:str):
         user_Agent = [
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
@@ -699,39 +708,35 @@ if  __name__ == "__main__":
 
 
 
-    # 大量測試
+    ## 大量測試
     
-    output = StringIO()
-    sys.stdout = output
+    # output = StringIO()
+    # sys.stdout = output
 
-    get_url("https://www.imdb.com/search/title/?title_type=movie")
+    # get_url("https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&genres=adventure&start=601&explore=genres&ref_=adv_nxt")
 
-    with open('url_list.txt', mode='r', encoding='utf-8') as f:
-        urls = f.readlines()
+    # with open('url_list.txt', mode='r', encoding='utf-8') as f:
+    #     urls = f.readlines()
 
-    url_list= [url.strip() for url in urls]
+    # url_list= [url.strip() for url in urls]
 
-    with ThreadPoolExecutor() as executor:
-        with tqdm(total=len(url_list), desc="Processing", unit="URL", ncols=80, leave=True, colour='red', position=0) as pbar:
-            for future in concurrent.futures.as_completed([executor.submit(scrapy, url, "2", "9") for url in url_list]):
-                pbar.update(1)
+    # with ThreadPoolExecutor() as executor:
+    #     with tqdm(total=len(url_list), desc="Processing", unit="URL", ncols=80, leave=True, colour='red', position=0) as pbar:
+    #         for future in concurrent.futures.as_completed([executor.submit(scrapy, url, "1", "1") for url in url_list]):
+    #             pbar.update(1)
 
     # 把過程最後全部print 出來
     # sys.stdout = sys.__stdout__
     # print(output.getvalue())
 
-    print("done.....")
+    # print("done.....")
 
     
 
     
-    
 
 
-
-
-
-    # 單測試
+    ## 單測試
     # scrapy("https://www.imdb.com/name/nm3943473/?ref_=tt_ov_dr", "3", "3")
 
 
